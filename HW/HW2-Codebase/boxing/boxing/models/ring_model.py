@@ -60,12 +60,20 @@ class RingModel:
         self.ring.append(boxer)
 
     def get_boxers(self) -> List[Boxer]:
-        if not self.ring:
-            pass
-        else:
-            pass
+        """
+        Path Parameter:
+            get_boxer (self) Takes in the ring object
 
-        return self.ring
+        Returns:
+            List of boxers in the ring
+            
+        Raises:
+            Error if the boxing ring is empty
+        """
+        if not self.ring:
+            raise ValueError("Ring is empty. Cannot return boxers")
+        else:
+            return self.ring
 
     def get_fighting_skill(self, boxer: Boxer) -> float:
         # Arbitrary calculations
@@ -73,3 +81,4 @@ class RingModel:
         skill = (boxer.weight * len(boxer.name)) + (boxer.reach / 10) + age_modifier
 
         return skill
+    

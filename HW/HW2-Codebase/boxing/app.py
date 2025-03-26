@@ -145,7 +145,10 @@ def add_boxer() -> Response:
             }), 400)
 
         app.logger.info(f"Adding boxer: {name}, {weight}kg, {height}cm, {reach} inches, {age} years old")
+
         boxers_model.create_boxer(name, weight, height, reach, age)
+
+
 
         app.logger.info(f"Boxer added successfully: {name}")
         return make_response(jsonify({
@@ -523,7 +526,7 @@ if __name__ == '__main__':
     app.logger.info("Starting Flask app...")
 
     try:
-        app.run(debug=True, host='0.0.0.0', port=5000)
+        app.run(debug=True, host='0.0.0.0', port=5001)
     except Exception as e:
         app.logger.error(f"Flask app encountered an error: {e}")
     finally:
