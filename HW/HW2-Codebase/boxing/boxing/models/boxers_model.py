@@ -170,6 +170,19 @@ def get_leaderboard(sort_by: str = "wins") -> List[dict[str, Any]]:
 
 
 def get_boxer_by_id(boxer_id: int) -> Boxer:
+    """Retrieves a boxer from the table by their table.
+
+        Args:
+            boxer_id (int): The ID of the boxer to retrieve.
+
+        Returns:
+            Boxer: The Boxer object corresponding to the boxer_id.
+
+        Raises:
+            ValueError: If the boxer is not found.
+            sqlite3.Error: If any database error occurs.
+
+    """
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
@@ -185,15 +198,28 @@ def get_boxer_by_id(boxer_id: int) -> Boxer:
                     id=row[0], name=row[1], weight=row[2], height=row[3],
                     reach=row[4], age=row[5]
                 )
+                logger.info(f"Boxer with ID {boxer_id} found")
                 return boxer
             else:
+                logger.info(f"Boxer with ID {boxer_id} not found")
                 raise ValueError(f"Boxer with ID {boxer_id} not found.")
 
     except sqlite3.Error as e:
+        logger.error(f"Database error while retrieving boxer by ID {boxer_id}: {e}")
         raise e
 
 
 def get_boxer_by_name(boxer_name: str) -> Boxer:
+    """Retrives a boxer from the table by its name.
+    Args:
+        boxer_name (str): The boxers name.
+
+    Returns: 
+        Boxer: The boxer object corresponding to the name.
+    Raises:
+        ValueError: If the boxer is not found.
+        sqlite3.Error: If any database error occurs.
+    """
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
@@ -209,8 +235,10 @@ def get_boxer_by_name(boxer_name: str) -> Boxer:
                     id=row[0], name=row[1], weight=row[2], height=row[3],
                     reach=row[4], age=row[5]
                 )
+                logger.info(f"Boxer with name '{boxer_name}' found")
                 return boxer
             else:
+                logger.info(f"Boxer with name '{boxer_name}' not found")
                 raise ValueError(f"Boxer '{boxer_name}' not found.")
 
     except sqlite3.Error as e:
