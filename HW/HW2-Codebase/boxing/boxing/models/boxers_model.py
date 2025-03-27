@@ -83,22 +83,46 @@ def create_boxer(name: str, weight: int, height: int, reach: float, age: int) ->
 
 
 def delete_boxer(boxer_id: int) -> None:
+    """ Permanently deletes a boxer from the table.
+    Args:
+        boxer_id (int): The ID of the boxer to delete.
+
+        Raises:
+        ValueError: If the song with the given ID does not exist.
+        sqlite3.Error: If any database error occurs.
+    """
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
 
             cursor.execute("SELECT id FROM boxers WHERE id = ?", (boxer_id,))
             if cursor.fetchone() is None:
+                logger.warning(f"Attempted to delete non-existent boxer with ID {boxer_id}")
                 raise ValueError(f"Boxer with ID {boxer_id} not found.")
 
             cursor.execute("DELETE FROM boxers WHERE id = ?", (boxer_id,))
             conn.commit()
+            logger.info(f"Successfully deleted boxer with ID {boxer_id}")
 
     except sqlite3.Error as e:
         raise e
 
 
 def get_leaderboard(sort_by: str = "wins") -> List[dict[str, Any]]:
+    """ Gets a list of the current leaderboard. 
+        
+    Args:
+        sort_by (str): If caller does not provide a value wins will be provided.
+
+    Returns:
+        List: A dictionary listing the winners.
+
+    Raises:
+        ValueError: If there is a invalid sort_by parameter.
+        sqlite3.Error: If any database error occurs.
+            
+    """
+    
     query = """
         SELECT id, name, weight, height, reach, age, fights, wins,
                (wins * 1.0 / fights) AS win_pct
@@ -108,9 +132,13 @@ def get_leaderboard(sort_by: str = "wins") -> List[dict[str, Any]]:
 
     if sort_by == "win_pct":
         query += " ORDER BY win_pct DESC"
+        logger.info(f"Leaderboard gets sorted by win_pct")
     elif sort_by == "wins":
         query += " ORDER BY wins DESC"
+        logger.info(f"Leaderboard gets sorted by wins")
+
     else:
+        logger.info(f"Invalid parameter")
         raise ValueError(f"Invalid sort_by parameter: {sort_by}")
 
     try:
