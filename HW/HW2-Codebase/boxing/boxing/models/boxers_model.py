@@ -42,13 +42,21 @@ def create_boxer(name: str, weight: int, height: int, reach: float, age: int) ->
 
         
         """
+    logger.info(f"Recived request to create a boxer: {name}")
+
     if weight < 125:
+        logger.warning("Invalid weight provided.")
         raise ValueError(f"Invalid weight: {weight}. Must be at least 125.")
+
     if height <= 0:
+        logger.warning("Invalid height provided.")
         raise ValueError(f"Invalid height: {height}. Must be greater than 0.")
     if reach <= 0:
+        logger.warning("Invalid reach provided.")
         raise ValueError(f"Invalid reach: {reach}. Must be greater than 0.")
+
     if not (18 <= age <= 40):
+        logger.warning("Invalid age provided.")
         raise ValueError(f"Invalid age: {age}. Must be between 18 and 40.")
 
     try:
