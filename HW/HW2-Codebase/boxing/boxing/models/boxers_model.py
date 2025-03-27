@@ -26,7 +26,22 @@ class Boxer:
 
 
 def create_boxer(name: str, weight: int, height: int, reach: float, age: int) -> None:
+        """
+        Creates a new boxer to add to the boxer table.
+        Args:
+        name(str): The boxer's name.
+        weight(str): The boxer's weight.
+        height (int): The boxer's height.
+        reach float: The boxer's reach
+        age (int): boxer's age
 
+        Raises:
+        Value error: If any field is invalid.
+        sqlite3.IntegrityError: If a boxer with the same name already exists. 
+        sqlite3.Error: For any other database errors.
+
+        
+        """
     if weight < 125:
         raise ValueError(f"Invalid weight: {weight}. Must be at least 125.")
     if height <= 0:
