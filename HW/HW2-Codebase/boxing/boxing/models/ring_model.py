@@ -14,20 +14,20 @@ configure_logger(logger)
 class RingModel:
     def __init__(self):
         """
-        Automatically initalizes the ring object
+        Automatically initalizes empty list of boxers
         """
         self.ring: List[Boxer] = []
 
     def fight(self) -> str:
         """
-        Path Parameter:
-            - self: An object that has its own ring data
+        Parameter:
+            self: An instance object that has its own data
 
         Returns: 
-            - The winner in the fight 
+            Name of the winner 
 
         Raises:
-            - If there are more than 2 boxers in the ring
+            If there are more than 2 boxers in the ring
 
         """
         if len(self.ring) < 2:
@@ -60,24 +60,44 @@ class RingModel:
         update_boxer_stats(loser.id, 'loss')
         logger.info(f"Record updated!")
 
-        logger.info(f"Clearing the ring...")
         self.clear_ring()
         logger.info(f"Ring is now cleared!")
 
         return winner.name
 
     def clear_ring(self):
+        """
+        Parameter:
+            self: An instance object that has its own data
+
+        Returns:
+            Empty list indicating that the ring is cleared
+        """
         if not self.ring:
+            logger.info(f"Clearing the ring...")
             return
         self.ring.clear()
 
     def enter_ring(self, boxer: Boxer):
+        """
+        Parameter: 
+            self: An instance object that has its own data
+            boxer (Boxer): The boxer to enter the ring
+
+        Raises:
+            If the boxer is not an instance, then the type is invalid
+            If there is more than 2 boxers in the ring
+
+        Returns:
+            Successfully added a boxer to the ring (list) 
+        """
         if not isinstance(boxer, Boxer):
             raise TypeError(f"Invalid type: Expected 'Boxer', got '{type(boxer).__name__}'")
 
         if len(self.ring) >= 2:
             raise ValueError("Ring is full, cannot add more boxers.")
 
+        logger.info(f"Boxer added to the ring successfully")
         self.ring.append(boxer)
 
     def get_boxers(self) -> List[Boxer]:
