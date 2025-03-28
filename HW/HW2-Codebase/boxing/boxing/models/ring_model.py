@@ -102,26 +102,39 @@ class RingModel:
 
     def get_boxers(self) -> List[Boxer]:
         """
-        Path Parameter:
-            get_boxer (self) Takes in the ring object
+        Parameter: 
+            self: An instance object that has its own data
 
         Returns:
-            List of boxers in the ring
-            
+            List[Boxer]: A list containing the boxers in the ring.
+
         Raises:
-            Error if the boxing ring is empty
+            ValueError: If the boxing ring is empty.
+
         """
         if not self.ring:
-            pass
+            raise ValueError("The boxing ring is empty.")
         else:
             pass
-
+        
+        logger.info(f"Ring has boxers!")
         return self.ring
 
     def get_fighting_skill(self, boxer: Boxer) -> float:
+        """
+        Parameter:
+            self: An instance object that has its own data
+            boxer (Boxer): The boxer to enter the ring
+
+        Returns:
+            Skill level of a boxer in type float
+        """
         # Arbitrary calculations
+        logger.info(f"Calculating {boxer.name}'s skill level...")
+
         age_modifier = -1 if boxer.age < 25 else (-2 if boxer.age > 35 else 0)
         skill = (boxer.weight * len(boxer.name)) + (boxer.reach / 10) + age_modifier
 
+        logger.info(f"{boxer.name}'s skill level calculated!")
         return skill
     
