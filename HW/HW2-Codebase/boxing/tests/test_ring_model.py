@@ -1,20 +1,23 @@
+from dataclasses import asdict
+
 import pytest
-from ..boxing.models.boxers_model import Boxer, update_boxer_stats
+
 from boxing.models.ring_model import RingModel
-from unittest.mock import patch
+from boxing.models.boxers_model import Boxer, update_boxer_stats
+
 
 @pytest.fixture
-def test_ring_model():
+def ring_model():
     return RingModel()
 
 
 @pytest.fixture
-def test_boxer_1():
+def boxer_1():
     return Boxer(id=1, name="Boxer 1", age=30, weight=180, reach=72)
 
 
 @pytest.fixture
-def test_boxer_2():
+def boxer_2():
     return Boxer(id=2, name="Boxer 2", age=28, weight=175, reach=70)
 
 
@@ -57,8 +60,7 @@ def test_fight(ring_model, boxer_1, boxer_2):
     ring_model.enter_ring(boxer_2)
 
     # Mock the get_random function to control the randomness
-    with patch("boxing.models.ring_model.get_random", return_value=0.1):
-        winner = ring_model.fight()
+    winner = ring_model.fight()
 
     assert winner in [boxer_1.name, boxer_2.name]
 
@@ -91,15 +93,13 @@ def test_get_fighting_skill(boxer_1):
     assert skill == expected_skill
 
 
-@patch("boxing.models.ring_model.update_boxer_stats")
 def test_fight_update_stats(mock_update, ring_model, boxer_1, boxer_2):
     # Test that stats are updated after a fight
     ring_model.enter_ring(boxer_1)
     ring_model.enter_ring(boxer_2)
 
     # Mock the get_random function to control the randomness
-    with patch("boxing.models.ring_model.get_random", return_value=0.1):
-        winner = ring_model.fight()
+    winner = ring_model.fight()
 
     # Check that the update_boxer_stats was called
     mock_update.assert_any_call(boxer_1.id, "win")
