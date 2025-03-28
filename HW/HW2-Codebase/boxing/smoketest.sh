@@ -116,6 +116,20 @@ get_boxer_by_name() {
 }
 
 
+get_boxer_leaderboard() {
+  sort_by=$1
+
+  echo "Getting boxer leaderboard sorted by $sort_by..."
+  response=$(curl -s -X GET "$BASE_URL/boxer-leaderboard?sort_by=$sort_by")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Leaderboard retrieved successfully (sorted by $sort_by)."
+    if [ "$ECHO_JSON" = true ]; then echo "$response" | jq .; fi
+  else
+    echo "Failed to retrieve boxer leaderboard."
+    exit 1
+  fi
+}
+
 update_boxer_stats() {
   boxer_id=$1
   result=$2
@@ -135,16 +149,34 @@ update_boxer_stats() {
 
 }
 
-get_boxer_leaderboard() {
-  sort_by=$1
 
-  echo "Getting boxer leaderboard sorted by $sort_by..."
-  response=$(curl -s -X GET "$BASE_URL/boxer-leaderboard?sort_by=$sort_by")
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Leaderboard retrieved successfully (sorted by $sort_by)."
-    if [ "$ECHO_JSON" = true ]; then echo "$response" | jq .; fi
-  else
-    echo "Failed to retrieve boxer leaderboard."
-    exit 1
-  fi
-}
+# Initialize the database
+sqlite3 db/playlist.db < sql/init_db.sql
+
+# Health checks
+check_health
+check_db
+
+
+# Create boxers
+create_boxer "Claressa Shields" 215 180 2.0 35
+create_boxer "Katie Taylor" 210 171 2.1 32
+create_boxer "Yakosta Valla" 155 178 2.0 30
+create_boxer "Savannah Marshall" 155 175 1.9 33
+create_boxer "Amanda Serrano" 200 150 2.2 29
+
+# delete boxer 
+delete_boxer_by_id 1
+
+# get boxer by id
+get_boxer_by_id 2
+# get boxer by name
+get_boxer_by_name "Amanda Serrano"
+
+# update boxer stats
+update_boxer_stats 2 win
+update_boxer_stats 3 loss
+
+# leaderboard
+get_boxer_leaderboard "wins"
+get_boxer_leaderboard "win_pct"
