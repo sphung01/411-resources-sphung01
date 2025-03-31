@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+dataclasses import dataclass
 import logging
 import sqlite3
 from typing import Any, List
@@ -246,22 +246,44 @@ def get_boxer_by_name(boxer_name: str) -> Boxer:
 
 
 def get_weight_class(weight: int) -> str:
+    """Retrives the weight class of a boxer by its weight
+
+    Args: weight(int): The boxer's weight
+    Returns: The weightclass corresponding to the weight
+    Raise:
+        ValueError: If weight is less than 125
+    """
     if weight >= 203:
         weight_class = 'HEAVYWEIGHT'
+        logger.info(f"Weight class is HEAVYWEIGHT")
     elif weight >= 166:
         weight_class = 'MIDDLEWEIGHT'
+        logger.info(f"Weight class is MIDDLEWEIGHT")
     elif weight >= 133:
         weight_class = 'LIGHTWEIGHT'
+        logger.info(f"Weight class is LIGHTWEIGHT")
     elif weight >= 125:
         weight_class = 'FEATHERWEIGHT'
+        logger.info(f"Weight class is FEATHERWEIGHT")
     else:
+        logger.info(f"Boxer with weight '{weight}' could not be classified.")
         raise ValueError(f"Invalid weight: {weight}. Weight must be at least 125.")
 
     return weight_class
 
 
 def update_boxer_stats(boxer_id: int, result: str) -> None:
+"""update the boxer's stats
+    Args: boxer_id (int), results(str)
+    
+    Returns: Does not return a value
+
+    Raise:
+        ValueError: If boxer's id cannot be found and if the result is not win or lose
+        sqlite3.Error: If any database error occurs.
+    """
     if result not in {'win', 'loss'}:
+        logger.info(f"Invalid Result")
         raise ValueError(f"Invalid result: {result}. Expected 'win' or 'loss'.")
 
     try:
@@ -270,6 +292,7 @@ def update_boxer_stats(boxer_id: int, result: str) -> None:
 
             cursor.execute("SELECT id FROM boxers WHERE id = ?", (boxer_id,))
             if cursor.fetchone() is None:
+                logger.info(f"Invalid Boxer ID")
                 raise ValueError(f"Boxer with ID {boxer_id} not found.")
 
             if result == 'win':
