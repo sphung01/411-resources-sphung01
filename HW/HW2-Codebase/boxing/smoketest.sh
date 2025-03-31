@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the base URL for the Flask API
-BASE_URL="http://localhost:5000/api"
+BASE_URL="http://localhost:5050/api"
 
 # Flag to control whether to echo JSON output
 ECHO_JSON=false
@@ -15,14 +15,10 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
-
 ###############################################
-#
-# Health checks
-#
+# Health Checks
 ###############################################
 
-# Function to check the health of the service
 check_health() {
   echo "Checking health status..."
   curl -s -X GET "$BASE_URL/health" | grep -q '"status": "success"'
@@ -34,7 +30,6 @@ check_health() {
   fi
 }
 
-# Function to check the database connection
 check_db() {
   echo "Checking database connection..."
   curl -s -X GET "$BASE_URL/db-check" | grep -q '"status": "success"'
@@ -46,11 +41,9 @@ check_db() {
   fi
 }
 
-##########################################################
-#
+###############################################
 # Boxer Management
-#
-##########################################################
+###############################################
 
 create_boxer() {
   name=$1
@@ -59,104 +52,143 @@ create_boxer() {
   reach=$4
   age=$5
 
-    echo "Creating boxer ($name)..."
-  response=$(curl -s -X POST "$BASE_URL/create-boxer" \
+  echo "Creating boxer ($name)..."
+  response=$(curl -s -X POST "$BASE_URL/add-boxer" \
     -H "Content-Type: application/json" \
     -d "{\"name\":\"$name\", \"weight\":$weight, \"height\":$height, \"reach\":$reach, \"age\":$age}")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Boxer created successfully: $name."
+    echo "Boxer created: $name"
     if [ "$ECHO_JSON" = true ]; then echo "$response" | jq .; fi
   else
-    echo "Failed to create boxer: $name."
+    echo "Failed to create boxer: $name"
     exit 1
   fi
-
 }
+
+
 
 delete_boxer() {
   boxer_id=$1
-
   echo "Deleting boxer by ID ($boxer_id)..."
   response=$(curl -s -X DELETE "$BASE_URL/delete-boxer/$boxer_id")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Boxer deleted successfully by ID ($boxer_id)."
+    echo "Boxer deleted: ID $boxer_id"
   else
-    echo "Failed to delete boxer by ID ($boxer_id)."
+    echo "Failed to delete boxer ID $boxer_id"
     exit 1
   fi
 }
 
 get_boxer_by_id() {
-    boxer_id=$1
-
+  boxer_id=$1
   echo "Getting boxer by ID ($boxer_id)..."
-  response=$(curl -s -X GET "$BASE_URL/get-boxer/$boxer_id")
+  response=$(curl -s -X GET "$BASE_URL/get-boxer-by-id/$boxer_id")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Boxer retrieved successfully by ID ($boxer_id)."
+    echo "Boxer retrieved by ID $boxer_id"
     if [ "$ECHO_JSON" = true ]; then echo "$response" | jq .; fi
   else
-    echo "Failed to get boxer by ID ($boxer_id)."
+    echo "Failed to retrieve boxer by ID $boxer_id"
     exit 1
   fi
 }
 
 get_boxer_by_name() {
   name=$1
-
   echo "Getting boxer by name ($name)..."
   response=$(curl -s -X GET "$BASE_URL/get-boxer-by-name/$name")
+  
+  echo $response
+ 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Boxer retrieved successfully by name ($name)."
+    echo "Boxer retrieved: $name"
     if [ "$ECHO_JSON" = true ]; then echo "$response" | jq .; fi
   else
-    echo "Failed to get boxer by name ($name)."
+    echo "Failed to retrieve boxer by name $name"
+    exit 1
+  fi
+}
+
+####### RING
+######## RING
+fight(){
+  ring=$1
+  echo "Starting the match"
+  response=$(curl -s -X GET "$BASE_URL/fight")
+
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Match ended successfully"
+    if [ "$ECHO_JSON" = true ]; then echo "$response" | jq .; fi
+  else
+    echo "Failed to trigger fight"
+    exit 1
+  fi
+}
+
+clear_boxers(){
+  echo "Clearing all boxers from the ring..."
+  response=$(curl -s -X POST "$BASE_URL/clear-boxers")
+
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Ring cleared successfully"
+    if [ "$ECHO_JSON" = true ]; then echo "$response" | jq .; fi
+  else
+    echo "Failed to clear ring"
+    exit 1
+  fi
+}
+
+enter_ring(){
+  boxer=$1
+  echo "Boxer: $boxer is entering the ring..."
+  response=$(curl -s -X POST "$BASE_URL/enter-ring" \
+    -H "Content-Type: application/json" \
+    -d "{\"name\":\"$boxer\"}")
+
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Boxer $boxer entered the ring successfully"
+    if [ "$ECHO_JSON" = true ]; then echo "$response" | jq .; fi
+  else
+    echo "Failed to enter boxer $boxer into the ring"
+    exit 1
+  fi
+}
+
+get_boxers(){
+  echo "Retrieving boxers in the ring..."
+  response=$(curl -s -X GET "$BASE_URL/get-boxers")
+
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Retrieved boxers successfully"
+    if [ "$ECHO_JSON" = true ]; then echo "$response" | jq .; fi
+  else
+    echo "Failed to retrieve boxers"
     exit 1
   fi
 }
 
 
+
+#####Leaderboard
 get_boxer_leaderboard() {
   sort_by=$1
-
-  echo "Getting boxer leaderboard sorted by $sort_by..."
-  response=$(curl -s -X GET "$BASE_URL/boxer-leaderboard?sort_by=$sort_by")
+  echo "Getting leaderboard sorted by $sort_by..."
+  response=$(curl -s -X GET "$BASE_URL/leaderboard?sort=$sort_by")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Leaderboard retrieved successfully (sorted by $sort_by)."
+    echo "Leaderboard sorted by $sort_by:"
     if [ "$ECHO_JSON" = true ]; then echo "$response" | jq .; fi
   else
-    echo "Failed to retrieve boxer leaderboard."
+    echo "Failed to retrieve leaderboard sorted by $sort_by"
     exit 1
   fi
 }
 
-update_boxer_stats() {
-  boxer_id=$1
-  result=$2
+###############################################
+# Smoke Test Execution
+###############################################
 
-  echo "Updating boxer ID $boxer_id with result: $result..."
-  response=$(curl -s -X POST "$BASE_URL/update-boxer-stats" \
-    -H "Content-Type: application/json" \
-    -d "{\"boxer_id\": $boxer_id, \"result\": \"$result\"}")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Boxer stats updated successfully for ID $boxer_id."
-    if [ "$ECHO_JSON" = true ]; then echo "$response" | jq .; fi
-  else
-    echo "Failed to update boxer stats for ID $boxer_id."
-    exit 1
-  fi
-
-}
-
-
-# Initialize the database
-sqlite3 db/playlist.db < sql/init_db.sql
-
-# Health checks
 check_health
 check_db
-
 
 # Create boxers
 create_boxer "Claressa Shields" 215 180 2.0 35
@@ -165,18 +197,22 @@ create_boxer "Yakosta Valla" 155 178 2.0 30
 create_boxer "Savannah Marshall" 155 175 1.9 33
 create_boxer "Amanda Serrano" 200 150 2.2 29
 
-# delete boxer 
-delete_boxer_by_id 1
+# Delete boxer by ID
+delete_boxer 1
 
-# get boxer by id
+# Get boxer by ID and name
 get_boxer_by_id 2
-# get boxer by name
-get_boxer_by_name "Amanda Serrano"
+get_boxer_by_name "Katie%20Taylor"
 
-# update boxer stats
-update_boxer_stats 2 win
-update_boxer_stats 3 loss
+clear_boxers
 
-# leaderboard
+enter_ring "Katie%20Taylor"
+enter_ring "Claressa%20Shields"
+fight
+get_boxers
+# Leaderboard sorting
 get_boxer_leaderboard "wins"
 get_boxer_leaderboard "win_pct"
+
+
+echo " All smoketest pass!"
