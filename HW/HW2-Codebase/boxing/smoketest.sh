@@ -110,20 +110,7 @@ get_boxer_by_name() {
 }
 
 ####### RING
-######## RING
-fight(){
-  ring=$1
-  echo "Starting the match"
-  response=$(curl -s -X GET "$BASE_URL/fight")
 
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Match ended successfully"
-    if [ "$ECHO_JSON" = true ]; then echo "$response" | jq .; fi
-  else
-    echo "Failed to trigger fight"
-    exit 1
-  fi
-}
 
 clear_boxers(){
   echo "Clearing all boxers from the ring..."
@@ -139,20 +126,22 @@ clear_boxers(){
 }
 
 enter_ring(){
-  boxer=$1
-  echo "Boxer: $boxer is entering the ring..."
+  boxer_name=$1
+  echo "Boxer: $boxer_name is entering the ring..."
   response=$(curl -s -X POST "$BASE_URL/enter-ring" \
     -H "Content-Type: application/json" \
-    -d "{\"name\":\"$boxer\"}")
+    -d "{\"name\":\"$boxer_name\"}")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Boxer $boxer entered the ring successfully"
+    echo "Boxer $boxer_name entered the ring successfully."
     if [ "$ECHO_JSON" = true ]; then echo "$response" | jq .; fi
   else
-    echo "Failed to enter boxer $boxer into the ring"
+    echo "Failed to enter boxer $boxer_name into the ring."
+    echo "$response" 
     exit 1
   fi
 }
+
 
 get_boxers(){
   echo "Retrieving boxers in the ring..."
@@ -202,17 +191,16 @@ delete_boxer 1
 
 # Get boxer by ID and name
 get_boxer_by_id 2
-get_boxer_by_name "Katie%20Taylor"
 
-clear_boxers
 
-enter_ring "Katie%20Taylor"
-enter_ring "Claressa%20Shields"
-fight
+enter_ring "Katie Taylor"
+
 get_boxers
 # Leaderboard sorting
 get_boxer_leaderboard "wins"
 get_boxer_leaderboard "win_pct"
+
+clear_boxers
 
 
 echo " All smoketest pass!"
