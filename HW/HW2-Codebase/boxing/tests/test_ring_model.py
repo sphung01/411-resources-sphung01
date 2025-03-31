@@ -1,3 +1,4 @@
+
 import pytest
 
 from boxing.models.ring_model import RingModel
@@ -17,6 +18,11 @@ def boxer_1():
 @pytest.fixture
 def boxer_2():
     return Boxer(id=2, name="Boxer 2", age=28, weight=175, height=169, reach=70)
+
+@pytest.fixture
+def mock_update_boxer_stats(mocker):
+    """Mock the update_boxer_stats function to avoid real database writes."""
+    return mocker.patch("boxing.models.ring_model.update_boxer_stats")
 
 
 def test_enter_ring(ring_model, boxer_1):
@@ -52,12 +58,10 @@ def test_get_boxers(ring_model, boxer_1, boxer_2):
     assert boxers[1] == boxer_2
 
 
-def test_fight(ring_model, boxer_1, boxer_2):
-    # Test the fight function
+def test_fight(ring_model, boxer_1, boxer_2, mocker, mock_update_boxer_stats):
     ring_model.enter_ring(boxer_1)
     ring_model.enter_ring(boxer_2)
 
-    # Mock the get_random function to control the randomness
     winner = ring_model.fight()
 
     assert winner in [boxer_1.name, boxer_2.name]
